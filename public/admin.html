@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AbiGigs — Administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --indigo:#2B2A4C; --indigo-dark:#201f38; --ochre:#E8A33D; --vermillion:#E4572E;
+    --paper:#FBF4E4; --palm:#1F7A5C; --ink:#201F2E; --ink-soft:#7d7b93; --line:#3a3966;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);}
+  .display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  #loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--indigo);}
+  .login-box{background:white;border-radius:8px;padding:32px;width:100%;max-width:340px;}
+  .login-box h1{font-family:'Space Grotesk',sans-serif;font-size:22px;margin-bottom:4px;}
+  .login-box p{font-size:13px;color:var(--ink-soft);margin-bottom:20px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;}
+  input,select{width:100%;font-family:inherit;padding:11px 14px;border:1.5px solid #ddd;border-radius:4px;font-size:14px;}
+  button{cursor:pointer;border:none;border-radius:4px;font-weight:600;font-size:14px;font-family:inherit;padding:12px 18px;}
+  .btn-primary{background:var(--vermillion);color:white;width:100%;}
+  .btn-primary:hover{background:#c8481f;}
+  .error-msg{color:var(--vermillion);font-size:13px;margin-top:10px;min-height:18px;}
+
+  #dashView{display:none;min-height:100vh;}
+  .sidebar{width:220px;background:var(--indigo);color:var(--paper);padding:24px 16px;position:fixed;top:0;bottom:0;}
+  .sidebar h1{font-family:'Space Grotesk',sans-serif;font-size:20px;margin-bottom:2px;}
+  .sidebar .tag{font-size:11px;color:var(--ochre);margin-bottom:28px;letter-spacing:1px;}
+  .nav-item{display:block;padding:11px 12px;border-radius:4px;color:rgba(251,244,228,0.7);font-size:14px;font-weight:500;cursor:pointer;margin-bottom:4px;}
+  .nav-item.active{background:rgba(251,244,228,0.1);color:white;}
+  .nav-item:hover{color:white;}
+  .logout{position:absolute;bottom:24px;left:16px;right:16px;}
+  .logout button{width:100%;background:transparent;border:1px solid rgba(251,244,228,0.3);color:rgba(251,244,228,0.8);}
+
+  .main{margin-left:220px;padding:32px;max-width:1100px;}
+  .main h2{font-family:'Space Grotesk',sans-serif;font-size:24px;margin-bottom:22px;}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px;}
+  .stat-card{background:white;border-radius:8px;padding:18px;box-shadow:0 2px 0 rgba(43,42,76,0.06);}
+  .stat-card .label{font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+  .stat-card .value{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;}
+  .stat-card.revenue .value{color:var(--palm);}
+  .stat-card.pending .value{color:var(--vermillion);}
+
+  table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;}
+  th,td{text-align:left;padding:12px 14px;font-size:13px;border-bottom:1px solid #f0ece0;}
+  th{background:#F5EEDD;font-weight:600;color:var(--ink-soft);text-transform:uppercase;font-size:11px;letter-spacing:0.5px;}
+  tr:last-child td{border-bottom:none;}
+  .badge{padding:3px 9px;border-radius:3px;font-size:11px;font-weight:600;}
+  .badge.pending_payment{background:#FFF3E0;color:#a15c00;}
+  .badge.published{background:#E8F4EE;color:var(--palm);}
+  .badge.rejected{background:#fbe9e7;color:var(--vermillion);}
+  .badge.pending{background:#FFF3E0;color:#a15c00;}
+  .badge.confirmed{background:#E8F4EE;color:var(--palm);}
+
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .row-actions button{padding:6px 10px;font-size:12px;}
+  .btn-approve{background:var(--palm);color:white;}
+  .btn-reject{background:#eee;color:var(--ink);}
+  .btn-feature{background:var(--ochre);color:white;}
+  .btn-delete{background:var(--vermillion);color:white;}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .settings-card{background:white;border-radius:8px;padding:24px;max-width:420px;}
+  .settings-card .field{margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<div id="loginView">
+  <div class="login-box">
+    <h1>AbiGigs Admin</h1>
+    <p>Connecte-toi pour gérer la plateforme</p>
+    <div class="field"><label>Email</label><input type="text" id="loginEmail"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="loginPassword"></div>
+    <button class="btn-primary" onclick="login()">Se connecter</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<div id="dashView">
+  <div class="sidebar">
+    <h1>AbiGigs</h1>
+    <div class="tag">ADMINISTRATION</div>
+    <div class="nav-item active" data-view="overview" onclick="switchView('overview')">Vue d'ensemble</div>
+    <div class="nav-item" data-view="jobs" onclick="switchView('jobs')">Annonces</div>
+    <div class="nav-item" data-view="requests" onclick="switchView('requests')">Demandes de publication</div>
+    <div class="nav-item" data-view="settings" onclick="switchView('settings')">Paramètres</div>
+    <div class="logout"><button onclick="logout()">Déconnexion</button></div>
+  </div>
+
+  <div class="main">
+    <div class="view active" id="view-overview">
+      <h2>Vue d'ensemble</h2>
+      <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <div class="view" id="view-jobs">
+      <h2>Annonces</h2>
+      <table>
+        <thead><tr><th>N°</th><th>Titre</th><th>Contact</th><th>Statut</th><th>Vedette</th><th>Actions</th></tr></thead>
+        <tbody id="jobsTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="view" id="view-requests">
+      <h2>Demandes de publication</h2>
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;max-width:640px;">
+        Un prestataire paie pour que son annonce soit publiée. Vérifie toi-même dans ton
+        appli Mobile Money ou tes SMS que le montant est bien arrivé avant de confirmer —
+        c'est cette action qui publie l'annonce automatiquement.
+      </p>
+      <table>
+        <thead><tr><th>N°</th><th>Annonce</th><th>Contact prestataire</th><th>Code transaction</th><th>Montant</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="reqTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="view" id="view-settings">
+      <h2>Paramètres</h2>
+      <div class="settings-card">
+        <div class="field">
+          <label>Prix de publication d'une annonce (FCFA)</label>
+          <input type="text" id="publishPriceInput">
+        </div>
+        <div class="field">
+          <label>Opérateur Mobile Money</label>
+          <input type="text" id="momoOperatorInput" placeholder="Ex: Orange Money">
+        </div>
+        <div class="field">
+          <label>Ton numéro Mobile Money (affiché aux prestataires)</label>
+          <input type="text" id="momoNumberInput" placeholder="Ex: 07 00 00 00 00">
+        </div>
+        <button class="btn-primary" onclick="saveSettings()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = window.ABIGIGS_API_URL || "http://localhost:3000";
+let token = localStorage.getItem('abigigs_admin_token') || null;
+
+if(token){ showDashboard(); }
+
+async function login(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errBox = document.getElementById('loginError');
+  errBox.textContent = '';
+  try{
+    const res = await fetch(`${API_URL}/api/admin/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if(res.ok){
+      token = data.token;
+      localStorage.setItem('abigigs_admin_token', token);
+      showDashboard();
+    } else {
+      errBox.textContent = data.error || "Erreur de connexion";
+    }
+  } catch(e){ errBox.textContent = "Impossible de contacter le serveur."; }
+}
+
+function logout(){
+  localStorage.removeItem('abigigs_admin_token');
+  token = null;
+  document.getElementById('dashView').style.display = 'none';
+  document.getElementById('loginView').style.display = 'flex';
+}
+
+function showDashboard(){
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('dashView').style.display = 'block';
+  loadStats(); loadJobs(); loadRequests(); loadSettings();
+}
+
+function authHeaders(){ return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }; }
+
+function switchView(v){
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === v));
+  document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === `view-${v}`));
+}
+
+async function apiGet(path){
+  const res = await fetch(`${API_URL}${path}`, { headers: authHeaders() });
+  if(res.status === 401){ logout(); throw new Error('unauthorized'); }
+  return res.json();
+}
+
+async function loadStats(){
+  const s = await apiGet('/api/admin/stats');
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card revenue"><div class="label">Revenu total</div><div class="value mono">${s.revenue} F</div></div>
+    <div class="stat-card"><div class="label">Publications payées</div><div class="value mono">${s.totalPublications}</div></div>
+    <div class="stat-card"><div class="label">Annonces publiées</div><div class="value mono">${s.publishedJobs}</div></div>
+    <div class="stat-card pending"><div class="label">En attente de paiement</div><div class="value mono">${s.pendingJobs}</div></div>
+    <div class="stat-card"><div class="label">Total annonces</div><div class="value mono">${s.totalJobs}</div></div>
+    <div class="stat-card pending"><div class="label">Demandes à vérifier</div><div class="value mono">${s.pendingRequests}</div></div>
+  `;
+}
+
+async function loadJobs(){
+  const jobs = await apiGet('/api/admin/jobs');
+  document.getElementById('jobsTableBody').innerHTML = jobs.map(j => `
+    <tr>
+      <td class="mono">${String(j.id).padStart(4,'0')}</td>
+      <td>${j.title}</td>
+      <td class="mono">${j.whatsapp}</td>
+      <td><span class="badge ${j.status}">${j.status}</span></td>
+      <td>${j.featured ? '⭐' : '—'}</td>
+      <td>
+        <div class="row-actions">
+          ${j.status !== 'published' ? `<button class="btn-approve" onclick="updateJob(${j.id},{status:'published'})">Publier</button>` : ''}
+          ${j.status !== 'rejected' ? `<button class="btn-reject" onclick="updateJob(${j.id},{status:'rejected'})">Rejeter</button>` : ''}
+          <button class="btn-feature" onclick="updateJob(${j.id},{featured:${!j.featured}})">${j.featured ? 'Retirer vedette' : 'Mettre en vedette'}</button>
+          <button class="btn-delete" onclick="deleteJob(${j.id})">Supprimer</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateJob(id, patch){
+  await fetch(`${API_URL}/api/admin/jobs/${id}`, { method:'PATCH', headers: authHeaders(), body: JSON.stringify(patch) });
+  loadJobs(); loadStats();
+}
+async function deleteJob(id){
+  if(!confirm('Supprimer cette annonce définitivement ?')) return;
+  await fetch(`${API_URL}/api/admin/jobs/${id}`, { method:'DELETE', headers: authHeaders() });
+  loadJobs(); loadStats();
+}
+
+async function loadRequests(){
+  const reqs = await apiGet('/api/admin/job-payment-requests');
+  document.getElementById('reqTableBody').innerHTML = reqs.map(r => `
+    <tr>
+      <td class="mono">${String(r.id).padStart(4,'0')}</td>
+      <td>${r.job_title || '—'}</td>
+      <td class="mono">${r.job_whatsapp || '—'}</td>
+      <td class="mono">${r.momo_reference || '—'}</td>
+      <td class="mono">${r.amount} F</td>
+      <td><span class="badge ${r.status}">${r.status}</span></td>
+      <td>
+        <div class="row-actions">
+          ${r.status === 'pending' ? `<button class="btn-approve" onclick="updateRequest(${r.id},'confirmed')">Confirmer</button>
+          <button class="btn-reject" onclick="updateRequest(${r.id},'rejected')">Rejeter</button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateRequest(id, status){
+  if(status === 'confirmed' && !confirm('As-tu bien vérifié la réception du paiement sur ton Mobile Money avant de confirmer ?')) return;
+  await fetch(`${API_URL}/api/admin/job-payment-requests/${id}`, { method:'PATCH', headers: authHeaders(), body: JSON.stringify({ status }) });
+  loadRequests(); loadJobs(); loadStats();
+}
+
+async function loadSettings(){
+  const s = await apiGet('/api/admin/settings');
+  document.getElementById('publishPriceInput').value = s.publish_price;
+  document.getElementById('momoOperatorInput').value = s.momo_operator;
+  document.getElementById('momoNumberInput').value = s.momo_number;
+}
+async function saveSettings(){
+  const publish_price = parseInt(document.getElementById('publishPriceInput').value);
+  const momo_operator = document.getElementById('momoOperatorInput').value.trim();
+  const momo_number = document.getElementById('momoNumberInput').value.trim();
+  await fetch(`${API_URL}/api/admin/settings`, { method:'PATCH', headers: authHeaders(), body: JSON.stringify({ publish_price, momo_operator, momo_number }) });
+  alert('Paramètres enregistrés.');
+}
+</script>
+
+</body>
+</html>

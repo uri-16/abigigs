@@ -1,0 +1,18 @@
+{
+  "name": "abigigs-backend",
+  "version": "4.0.0",
+  "description": "AbiGigs — marketplace de petits boulots à Abidjan, le prestataire paie pour publier son annonce (paiement manuel Mobile Money) et dashboard admin",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

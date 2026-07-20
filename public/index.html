@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AbiGigs — Petits boulots à Abidjan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --indigo:#2B2A4C; --ochre:#E8A33D; --vermillion:#E4572E;
+    --paper:#FBF4E4; --palm:#1F7A5C; --ink:#201F2E; --ink-soft:#5c5a72; --line:#DCD3BE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'IBM Plex Sans',sans-serif;background:var(--paper);color:var(--ink);
+    background-image:radial-gradient(circle at 1px 1px, rgba(43,42,76,0.06) 1px, transparent 0);
+    background-size:22px 22px;
+  }
+  .display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  header{background:var(--indigo);color:var(--paper);padding:28px 20px 22px;position:relative;overflow:hidden;}
+  header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:6px;background:repeating-linear-gradient(90deg,var(--ochre) 0 14px, var(--vermillion) 14px 28px);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ochre);margin-bottom:6px;}
+  header h1{font-size:32px;font-weight:700;letter-spacing:-0.5px;}
+  header p{opacity:0.8;margin-top:6px;font-size:14px;max-width:520px;}
+
+  .container{max-width:920px;margin:0 auto;padding:24px 20px;}
+
+  .tabs{display:flex;gap:10px;margin-bottom:22px;}
+  .tab{flex:1;text-align:center;padding:13px;background:white;border-radius:4px;cursor:pointer;font-weight:600;font-size:14px;border:1.5px solid var(--line);color:var(--ink-soft);}
+  .tab.active{border-color:var(--vermillion);color:var(--vermillion);background:#FFF6F1;}
+
+  .toolbar{display:flex;gap:10px;margin-bottom:22px;}
+  input,select,textarea{font-family:inherit;padding:11px 14px;border:1.5px solid var(--line);border-radius:4px;font-size:14px;background:white;color:var(--ink);}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--ochre);outline-offset:1px;}
+  #searchInput{flex:1;}
+
+  button{cursor:pointer;border:none;border-radius:4px;font-weight:600;font-size:14px;font-family:inherit;padding:12px 18px;}
+  .btn-primary{background:var(--indigo);color:var(--paper);width:100%;}
+  .btn-primary:hover{background:#3a3966;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px;}
+
+  .ticket{background:white;border-radius:8px;box-shadow:0 3px 0 rgba(43,42,76,0.08);position:relative;overflow:hidden;}
+  .ticket .top{padding:18px 18px 14px;}
+  .ticket-num{font-size:11px;color:var(--ink-soft);margin-bottom:8px;}
+  .cat-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--palm);background:#E8F4EE;padding:3px 9px;border-radius:3px;margin-bottom:9px;}
+  .ticket h3{font-size:17px;font-weight:700;margin-bottom:6px;line-height:1.3;}
+  .ticket .desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:10px;}
+  .ticket .commune{font-size:12px;color:var(--ink-soft);}
+
+  .perforation{height:0;border-top:2px dashed var(--line);position:relative;margin:0 0;}
+  .perforation::before, .perforation::after{content:"";position:absolute;top:-8px;width:16px;height:16px;background:var(--paper);border-radius:50%;}
+  .perforation::before{left:-8px;}
+  .perforation::after{right:-8px;}
+
+  .stub{padding:14px 18px;background:#FAF8F2;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .amount-box{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:17px;color:var(--ink);}
+  .amount-box small{display:block;font-size:10px;font-weight:500;color:var(--ink-soft);letter-spacing:1px;}
+
+  .featured-stamp{position:absolute;top:14px;right:-30px;background:var(--vermillion);color:white;font-size:10px;font-weight:700;padding:4px 34px;transform:rotate(35deg);letter-spacing:1px;box-shadow:0 2px 4px rgba(0,0,0,0.15);}
+
+  .contact-btn{background:#25D366;color:white;white-space:nowrap;}
+  .contact-btn:hover{background:#1fb257;}
+
+  .form-card{background:white;border-radius:8px;padding:26px;box-shadow:0 3px 0 rgba(43,42,76,0.08);}
+  .form-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin-bottom:8px;}
+  .form-card .sub{font-size:13px;color:var(--ink-soft);margin-bottom:18px;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.5px;}
+  .field input,.field select,.field textarea{width:100%;}
+  textarea{min-height:80px;resize:vertical;}
+  .row2{display:flex;gap:12px;}
+  .row2 .field{flex:1;}
+
+  .payment-box{background:#FAF8F2;border:1.5px dashed var(--line);border-radius:8px;padding:16px 18px;margin:18px 0;}
+  .payment-box .price-line{font-family:'IBM Plex Mono',monospace;font-size:15px;display:flex;justify-content:space-between;margin-bottom:10px;}
+
+  .empty{text-align:center;color:var(--ink-soft);padding:50px 20px;font-size:14px;}
+
+  .requests-panel{background:white;border-radius:8px;padding:16px 18px;margin-bottom:18px;border:1.5px dashed var(--line);}
+  .requests-panel h4{font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-soft);margin-bottom:10px;}
+  .req-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0ece0;font-size:13px;gap:10px;}
+  .req-row:last-child{border-bottom:none;}
+  .req-status{font-size:11px;font-weight:700;padding:3px 8px;border-radius:3px;white-space:nowrap;}
+  .req-status.pending{background:#FFF3E0;color:#a15c00;}
+  .req-status.confirmed{background:#E8F4EE;color:var(--palm);}
+  .req-status.rejected{background:#fbe9e7;color:var(--vermillion);}
+  .req-row button{padding:6px 10px;font-size:12px;background:#eee;}
+
+  footer{text-align:center;padding:28px 20px;color:var(--ink-soft);font-size:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Marché des petits boulots</div>
+  <h1 class="display">AbiGigs</h1>
+  <p>Ménage, cours, livraison, réparation — trouve un service près de chez toi à Abidjan, gratuitement.</p>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" id="tabBrowse" onclick="switchTab('browse')">Voir les annonces</div>
+    <div class="tab" id="tabPost" onclick="switchTab('post')">Proposer un service</div>
+  </div>
+
+  <div id="browseView">
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Rechercher un service..." oninput="render()">
+    </div>
+    <div class="grid" id="jobsGrid"></div>
+  </div>
+
+  <div id="postView" style="display:none;">
+    <div class="form-card" id="postFormCard">
+      <h2 class="display">Proposer un service</h2>
+      <p class="sub">Ton annonce sera visible par tous les clients gratuitement, une fois publiée.</p>
+      <div class="field"><label>Titre</label><input type="text" id="fTitle" placeholder="Ex: Cours de maths niveau lycée"></div>
+      <div class="row2">
+        <div class="field"><label>Catégorie</label>
+          <select id="fCat"><option>Ménage</option><option>Cours particuliers</option><option>Livraison</option><option>Réparation</option><option>Coiffure & Beauté</option><option>Transport</option><option>Informatique</option><option>Autre</option></select>
+        </div>
+        <div class="field"><label>Commune</label>
+          <select id="fCommune"><option>Cocody</option><option>Yopougon</option><option>Abobo</option><option>Marcory</option><option>Plateau</option><option>Treichville</option><option>Koumassi</option><option>Adjamé</option><option>Port-Bouët</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Description</label><textarea id="fDesc"></textarea></div>
+      <div class="row2">
+        <div class="field"><label>Prix de ton service (FCFA)</label><input type="text" id="fPrice" placeholder="Ex: 3000"></div>
+        <div class="field"><label>Ton WhatsApp (avec indicatif)</label><input type="text" id="fWhatsapp" placeholder="2250700000000"></div>
+      </div>
+      <button class="btn-primary" onclick="postJob()">Continuer vers le paiement</button>
+    </div>
+
+    <div class="form-card" id="paymentFormCard" style="display:none;">
+      <h2 class="display">Paye pour publier ton annonce</h2>
+      <div class="payment-box">
+        <div class="price-line"><span>Montant à envoyer</span><strong id="publishPriceLabel">500 FCFA</strong></div>
+        <p style="font-size:13px;color:var(--ink-soft);">
+          Envoie ce montant via <strong id="momoOperatorLabel">Mobile Money</strong> au numéro
+          <strong class="mono" id="momoNumberLabel">—</strong>, puis colle ci-dessous le code de
+          transaction reçu par SMS. Ton annonce sera publiée dès que le paiement sera vérifié
+          (généralement sous quelques heures).
+        </p>
+      </div>
+      <div class="field"><label>Code de transaction (SMS reçu)</label><input type="text" id="pRef" placeholder="Ex: MP240716.1234.A56789"></div>
+      <button class="btn-primary" onclick="submitPayment()">J'ai payé — envoyer ma demande</button>
+    </div>
+  </div>
+</div>
+
+<footer>AbiGigs · les prestataires paient pour être visibles, les clients contactent gratuitement</footer>
+
+<script>
+const API_URL = window.ABIGIGS_API_URL || "http://localhost:3000";
+
+let jobs = [];
+let pendingJobId = null;
+let paymentInfo = { publish_price: 500, momo_number: '—', momo_operator: 'Mobile Money' };
+
+async function loadJobs(){
+  try {
+    const res = await fetch(`${API_URL}/api/jobs`);
+    jobs = await res.json();
+    render();
+  } catch(e){
+    document.getElementById('jobsGrid').innerHTML = '<div class="empty">Impossible de contacter le serveur.</div>';
+  }
+}
+
+async function loadPaymentInfo(){
+  try {
+    const res = await fetch(`${API_URL}/api/payment-info`);
+    paymentInfo = await res.json();
+  } catch(e){ /* garde les valeurs par défaut */ }
+}
+
+function switchTab(t){
+  document.getElementById('tabBrowse').classList.toggle('active', t==='browse');
+  document.getElementById('tabPost').classList.toggle('active', t==='post');
+  document.getElementById('browseView').style.display = t==='browse' ? 'block' : 'none';
+  document.getElementById('postView').style.display = t==='post' ? 'block' : 'none';
+  if(t==='post'){
+    document.getElementById('postFormCard').style.display = 'block';
+    document.getElementById('paymentFormCard').style.display = 'none';
+  }
+}
+
+function render(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = jobs.filter(j => !search || j.title.toLowerCase().includes(search) || j.desc.toLowerCase().includes(search));
+  filtered.sort((a,b)=> (b.featured?1:0)-(a.featured?1:0));
+
+  const grid = document.getElementById('jobsGrid');
+  if(filtered.length===0){ grid.innerHTML = '<div class="empty">Aucune annonce trouvée.</div>'; return; }
+
+  grid.innerHTML = filtered.map(j=>`
+    <div class="ticket">
+      ${j.featured ? '<div class="featured-stamp">VEDETTE</div>' : ''}
+      <div class="top">
+        <div class="ticket-num mono">N° ${String(j.id).padStart(4,'0')}</div>
+        <div class="cat-tag">${j.cat}</div>
+        <h3>${j.title}</h3>
+        <p class="desc">${j.desc}</p>
+        <div class="commune">📍 ${j.commune}</div>
+      </div>
+      <div class="perforation"></div>
+      <div class="stub">
+        <div class="amount-box">${j.price}<small>FCFA</small></div>
+        <button class="contact-btn" onclick="window.open('https://wa.me/${j.whatsapp}','_blank')">Contacter</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function postJob(){
+  const body = {
+    title: document.getElementById('fTitle').value.trim(),
+    cat: document.getElementById('fCat').value,
+    commune: document.getElementById('fCommune').value,
+    desc: document.getElementById('fDesc').value.trim(),
+    price: document.getElementById('fPrice').value.trim(),
+    whatsapp: document.getElementById('fWhatsapp').value.trim(),
+  };
+  if(!body.title || !body.desc || !body.price || !body.whatsapp){ alert("Remplis tous les champs."); return; }
+
+  const res = await fetch(`${API_URL}/api/jobs`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+  });
+  if(res.ok){
+    const job = await res.json();
+    pendingJobId = job.id;
+    document.getElementById('publishPriceLabel').textContent = `${paymentInfo.publish_price} FCFA`;
+    document.getElementById('momoOperatorLabel').textContent = paymentInfo.momo_operator;
+    document.getElementById('momoNumberLabel').textContent = paymentInfo.momo_number;
+    document.getElementById('postFormCard').style.display = 'none';
+    document.getElementById('paymentFormCard').style.display = 'block';
+  } else {
+    alert("Erreur lors de la création de l'annonce.");
+  }
+}
+
+async function submitPayment(){
+  const momo_reference = document.getElementById('pRef').value.trim();
+  if(!momo_reference){ alert("Renseigne le code de transaction reçu par SMS."); return; }
+
+  try {
+    const res = await fetch(`${API_URL}/api/jobs/${pendingJobId}/pay`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ momo_reference })
+    });
+    const data = await res.json();
+    if(res.ok && data.request_id){
+      saveTrackedRequest({ id: data.request_id, jobTitle: document.getElementById('fTitle').value.trim() || 'Ton annonce', status: 'pending' });
+      alert("Demande envoyée ! Dès que ton paiement est vérifié, ton annonce sera publiée. Suis son statut dans l'onglet \"Voir les annonces\".");
+      ['fTitle','fDesc','fPrice','fWhatsapp','pRef'].forEach(id => document.getElementById(id).value = '');
+      switchTab('browse');
+      renderMyRequests();
+    } else {
+      alert("Erreur: " + (data.error || "impossible d'envoyer la demande"));
+    }
+  } catch(e){ alert("Erreur de connexion au serveur."); }
+}
+
+// ===== Suivi des demandes de publication (stocké localement dans le navigateur) =====
+function getTrackedRequests(){
+  try { return JSON.parse(localStorage.getItem('abigigs_pub_requests') || '[]'); }
+  catch { return []; }
+}
+function saveTrackedRequest(entry){
+  const list = getTrackedRequests();
+  list.unshift(entry);
+  localStorage.setItem('abigigs_pub_requests', JSON.stringify(list.slice(0, 20)));
+}
+
+async function renderMyRequests(){
+  const list = getTrackedRequests();
+  let panel = document.getElementById('myRequestsPanel');
+  if(!panel){
+    panel = document.createElement('div');
+    panel.id = 'myRequestsPanel';
+    document.getElementById('browseView').insertBefore(panel, document.getElementById('jobsGrid'));
+  }
+  if(list.length === 0){ panel.innerHTML = ''; return; }
+
+  panel.innerHTML = `
+    <div class="requests-panel">
+      <h4>Mes demandes de publication</h4>
+      <div id="reqRows"></div>
+    </div>
+  `;
+  const rows = document.getElementById('reqRows');
+  rows.innerHTML = list.map(r => `
+    <div class="req-row">
+      <span>${r.jobTitle}</span>
+      <span class="req-status ${r.status}">${r.status === 'pending' ? 'En attente' : r.status === 'confirmed' ? 'Publiée' : 'Rejetée'}</span>
+      ${r.status === 'pending' ? `<button onclick="checkOneRequest(${r.id})">Vérifier</button>` : ''}
+    </div>
+  `).join('');
+}
+
+async function checkOneRequest(id){
+  const res = await fetch(`${API_URL}/api/job-payment-request/${id}/status`);
+  const data = await res.json();
+  const list = getTrackedRequests();
+  const entry = list.find(r => r.id === id);
+  if(entry){
+    entry.status = data.status;
+    localStorage.setItem('abigigs_pub_requests', JSON.stringify(list));
+  }
+  renderMyRequests();
+  if(data.status === 'confirmed'){
+    alert(`Paiement confirmé ! Ton annonce "${data.jobTitle}" est maintenant publiée.`);
+    loadJobs();
+  } else if(data.status === 'pending'){
+    alert("Toujours en attente de vérification. Réessaie un peu plus tard.");
+  } else if(data.status === 'rejected'){
+    alert("Ce paiement n'a pas pu être vérifié — vérifie le code de transaction ou recontacte le support.");
+  }
+}
+
+loadJobs();
+loadPaymentInfo();
+renderMyRequests();
+</script>
+
+</body>
+</html>
