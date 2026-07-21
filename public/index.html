@@ -155,7 +155,9 @@
 <footer>AbiGigs · les prestataires paient pour être visibles, les clients contactent gratuitement</footer>
 
 <script>
-const API_URL = window.ABIGIGS_API_URL || "http://localhost:3000";
+// Vide = même origine que la page (fonctionne en local ET une fois déployé sur Render,
+// tant que le backend sert lui-même ce fichier via express.static).
+const API_URL = window.ABIGIGS_API_URL || "";
 
 let jobs = [];
 let pendingJobId = null;
